@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_AMICI 10
+#define N 100
+
+typedef struct _persona{
+    char nome[10], cognome[10];
+    struct _persona* amici[MAX_AMICI];
+    int num_amici;
+    struct _persona * next;
+} persona;
+
+typedef persona * lista;
+
+//funzioni richieste dall'esercizio
+lista inserisciPersone(lista utenti, persona* nuovo_utente);
+void aggiungiAmico(persona* utente, persona* nuovo_amico);
+int calcolaPersoneRaggiungibili(persona* utente, persona* utento_raggiungibili[N], int num_raggiunti);
+
+//funzioni ausiliarie per creare un esempio da far girare
+persona* creaUtente(char nome[10], char cognome[10]);
+lista crea();
+void visualizzaUtente(persona* utente);
+void visualizzaSocial(lista social);
+persona* getUtente(lista utenti, int indice);
+
+int main(){
+    lista social;
+    lista utente0;
+    lista raggiunti[N];
+    int num_raggiunti, i;
+
+    social=crea();
+
+    visualizzaSocial(social);
+
+    utente0=social;
+
+    raggiunti[0]=utente0;
+    num_raggiunti=calcolaPersoneRaggiungibili(utente0, raggiunti, 1);
+
+    printf("\nUtente 0:\n ");
+    visualizzaUtente(utente0);
+
+    printf("\nUtenti raggiunti\n");
+    for(i=1; i<num_raggiunti; i++){
+        visualizzaUtente(raggiunti[i]);
+    }
+}
+
+lista crea(){
+    lista social = NULL;
+    social = inserisciPersone(social, creaUtente("Ambrogio", "Ambrosoli"));
+    social = inserisciPersone(social, creaUtente("Bernardo", "Brunelleschi"));
+    social = inserisciPersone(social, creaUtente("Cesare", "Cocuzza"));
+    social = inserisciPersone(social, creaUtente("Demetrio", "Damiani"));
+    social = inserisciPersone(social, creaUtente("Erika", "Ellenini"));
+    social = inserisciPersone(social, creaUtente("Francesca", "Fanfarani"));
+    social = inserisciPersone(social, creaUtente("Giacobbe", "Giacobazzi"));
+    social = inserisciPersone(social, creaUtente("Helena", "Hubert"));
+
+    aggiungiAmico(getUtente(social, 0), getUtente(social, 1));
+    aggiungiAmico(getUtente(social, 0), getUtente(social, 2));
+    aggiungiAmico(getUtente(social, 0), getUtente(social, 3));
+    aggiungiAmico(getUtente(social, 1), getUtente(social, 2));
+    aggiungiAmico(getUtente(social, 2), getUtente(social, 4));
+    aggiungiAmico(getUtente(social, 2), getUtente(social, 5));
+    aggiungiAmico(getUtente(social, 2), getUtente(social, 5));
+    aggiungiAmico(getUtente(social, 6), getUtente(social, 7));
+    aggiungiAmico(getUtente(social, 1), getUtente(social, 0));
+
+    return social;
+}
+
+persona* creaUtente(char nome[10], char cognome[10]){
+    persona* utente=(persona*) malloc(sizeof(persona));
+    strcpy(utente->nome, nome);
+    strcpy(utente->cognome, cognome);
+    utente->num_amici=0;
+    utente->next=NULL;
+    return utente;
+}
+
+lista inserisciPersone(lista utenti, persona* nuovo_utente){
+    if(utenti==NULL){
+        return nuovo_utente;
+    }else{
+        utenti->next=inserisciPersone(utenti->next, nuovo_utente);
+        return utenti;
+    }
+}
+
+persona* getUtente(lista utenti, int indice){
+    if(indice==0){
+        return utenti;
+    }else{
+        return getUtente(utenti->next, indice-1);
+    }
+}
+
+void aggiungiAmico(persona* utente, persona* nuovo_amico){
+    if(utente->num_amici==MAX_AMICI){
+        printf("Numero massimo di amici raggiunto\n");
+    }else{
+        utente->amici[utente->num_amici]=nuovo_amico;
+        utente->num_amici++;
+    }
+}
+
+void visualizzaUtente(persona* utente){
+    printf("%s %s (%d amici)\n", utente->nome, utente->cognome, utente->num_amici);
+}
+
+void visualizzaSocial(lista social){
+    if(social==NULL){
+        printf("---------------\n");
+    }else{
+        visualizzaUtente(social);
+        visualizzaSocial(social->next);
+    }
+}
+
+int calcolaPersoneRaggiungibili(persona* utente, persona* utenti_raggiunti[N], int num_raggiunti){
+    int i, j, match;
+    persona* amico;
+
+    for(i=0; i<utente->num_amici; i++){
+        amico = utente->amici[i];
+
+        match=0;
+        for(j=0; j<num_raggiunti; j++){
+            if(utenti_raggiunti[j]==amico){
+                match=1;
+                break;
+            }
+        }
+        if(!match){
+            utenti_raggiunti[num_raggiunti]=amico;
+            num_raggiunti++;
+
+            num_raggiunti=calcolaPersoneRaggiungibili(amico, utenti_raggiunti, num_raggiunti);
+        }
+    }
+    return num_raggiunti;
+}

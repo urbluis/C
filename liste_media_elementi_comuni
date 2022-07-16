@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define N 20
+
+typedef struct Nd{
+    int info;
+    struct Nd * next;
+}Nodo;
+
+typedef Nodo * lista;
+
+lista insInTesta(lista list, int numero);
+lista crea(lista list);
+void visualizzaLista(lista list);
+float mediaElemComuni(lista list1, lista list2);
+
+lista elemComuni(lista l1, lista l2);
+
+int main(){
+    lista l1=NULL, l2=NULL;
+    srand(time(NULL));
+
+    l1=crea(l1);
+    printf("l1:\n");
+    visualizzaLista(l1);
+    l2=crea(l2);
+    printf("\nl2:\n");
+    visualizzaLista(l2);
+
+    printf("\nLa media degli elementi in comune: %.2f", mediaElemComuni(l1, l2));
+    return 0;
+}
+
+lista insInTesta(lista lis, int numero){
+    lista punt;
+
+    punt=(lista)malloc(sizeof(Nodo));
+    punt->info=numero;
+    punt->next=lis;
+    return punt;
+}
+
+lista crea(lista list){
+    int j;
+    for(j=0; j<N; j++){
+        list=insInTesta(list, rand()%13+18);
+    }
+    return list;
+}
+
+void visualizzaLista(lista list){
+    if(list==NULL){
+        printf(" (fine)");
+        return;
+    }else{
+        printf(" %d ->", list->info);
+        return visualizzaLista(list->next);
+    }
+}
+
+float mediaElemComuni(lista list1, lista list2){
+    lista punt=list2;
+    int cont=0, s=0;
+    while(list1!=NULL){
+        list2=punt;
+        while(list2!=NULL){
+            if(list1->info==list2->info){
+                s+=list1->info;
+                printf("\n %d", list1->info);
+                cont++;
+                break;
+            }
+            list2=list2->next;
+        }
+        list1=list1->next;
+    }
+    return (1.0*s)/cont;
+}
